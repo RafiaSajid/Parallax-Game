@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>New password · PARALLAX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+<main id="app" class="container is-loading">
+  <section class="card auth-card">
+    <h1>Choose a new password</h1>
+    <div id="invalid" class="stack" hidden>
+      <p class="msg msg-error">This reset link is invalid or has expired.</p>
+      <a class="btn btn-primary" href="reset-request.html">Request a new link</a>
+    </div>
+    <form id="update-form" novalidate hidden>
+      <div class="field"><label for="password">New password</label><input id="password" name="password" type="password" autocomplete="new-password" required><ul id="pw-rules" class="rules" aria-label="Password requirements"></ul><p class="hint">Spaces are allowed. No emoji.</p></div>
+      <div class="field"><label for="password2">Confirm new password</label><input id="password2" name="password2" type="password" autocomplete="new-password" required></div>
+      <div id="msg" class="msg" role="alert" hidden></div>
+      <button class="btn btn-primary btn-block" type="submit">Save password</button>
+    </form>
+  </section>
+</main>
+<noscript><p class="msg msg-error container">PARALLAX needs JavaScript enabled.</p></noscript>
+<script type="module" src="js/pages/reset-update.js"></script>
+</body>
+</html>

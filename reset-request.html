@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Reset password · PARALLAX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+<main id="app" class="container is-loading">
+  <section class="card auth-card">
+    <h1>Reset your password</h1>
+    <form id="reset-form" novalidate>
+      <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+      <div id="msg" class="msg" role="alert" hidden></div>
+      <button class="btn btn-primary btn-block" type="submit">Send reset link</button>
+    </form>
+    <p class="auth-links"><a href="login.html">Back to log in</a></p>
+  </section>
+</main>
+<noscript><p class="msg msg-error container">PARALLAX needs JavaScript enabled.</p></noscript>
+<script type="module" src="js/pages/reset-request.js"></script>
+</body>
+</html>

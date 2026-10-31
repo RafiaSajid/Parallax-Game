@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Levels · PARALLAX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+<main id="app" class="container is-loading">
+  <div id="msg" class="msg" role="alert" hidden></div>
+  <section class="page-head"><div><h1>Choose a room</h1><p class="muted">Finish a room to unlock the next one.</p></div></section>
+  <div id="levels" class="grid grid-2"></div>
+</main>
+<noscript><p class="msg msg-error container">PARALLAX needs JavaScript enabled.</p></noscript>
+<script type="module" src="js/pages/levels.js"></script>
+</body>
+</html>
