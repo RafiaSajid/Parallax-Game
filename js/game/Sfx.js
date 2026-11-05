@@ -21,6 +21,7 @@ export class Sfx {
       case 'select': this.tone(660, 0.07, { type: 'triangle', gain: 0.18 }); break;
       case 'slide': this.tone(220, 0.1, { type: 'triangle', f1: 140, gain: 0.22 }); break;
       case 'turn': this.tone(300, 0.14, { type: 'square', f1: 520, gain: 0.08 }); break;
+      case 'jump': this.tone(380, 0.14, { type: 'triangle', f1: 640, gain: 0.14 }); break;
       case 'bump': this.tone(90, 0.12, { type: 'sine', gain: 0.35 }); break;
       case 'undo': this.tone(520, 0.12, { type: 'triangle', f1: 300, gain: 0.18 }); break;
       case 'plateOn': this.tone(660, 0.18, { gain: 0.25 }); this.tone(990, 0.3, { gain: 0.2, delay: 0.1 }); break;

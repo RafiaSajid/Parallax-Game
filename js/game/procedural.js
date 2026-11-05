@@ -42,7 +42,7 @@ export class ProceduralKit {
   wall() {
     const g = new THREE.Group();
     const body = mesh(this.g.wall, this.m.wall); body.position.y = 0.45;
-    const cap = mesh(this.g.cap, this.m.cap, true, false); cap.position.y = 0.935;
+    const cap = mesh(this.g.cap, this.m.cap, false, false); cap.position.y = 0.935;
     g.add(body, cap); return g;
   }
   base(w, d) {

@@ -12,7 +12,7 @@
 Modules do not work from `file://`. From the `parallax` folder run `npx serve -l 3000` or `python3 -m http.server 3000`, then open http://localhost:3000.
 
 ## 3. Deploy on Netlify (free)
-Drag the `parallax` folder onto app.netlify.com/drop, or connect a Git repo with **no build command** and publish directory `.`. `netlify.toml` adds the security headers and CSP. Then add the `*.netlify.app` URL to Supabase's Site URL and Redirect URLs (step 1.5).
+Run `node tools/make-deploy.mjs`, then drag the generated `deploy` folder onto your Netlify site (Deploys tab) or app.netlify.com/drop. Or connect a Git repo with **no build command** and publish directory `.`. The `_headers` file adds the security headers and CSP. Full guide: `docs/DEPLOY.md`. Then add the `*.netlify.app` URL to Supabase's Site URL and Redirect URLs (step 1.5).
 
 ## 4. Verify RLS
 Create two accounts, then follow `supabase/rls_tests.sql`.
@@ -36,7 +36,7 @@ Account deletion (needs the service-role key on a server). Players cannot write 
 - Email links: the redirect address must be listed under Authentication -> URL Configuration -> Redirect URLs EXACTLY (same host and port, e.g. http://localhost:3000/** vs http://127.0.0.1:3000/**). Otherwise Supabase sends people to the Site URL.
 
 ## 3D engine notes
-- Three.js is pinned to 0.170.0 from jsDelivr through an import map in `game.html`. Netlify's CSP allows that inline import map by its SHA-256 hash (in `netlify.toml`). If you change the import map (for example the Three.js version), the browser console shows the new expected `sha256-...` value; paste it into `netlify.toml`. Keep the import map on ONE line.
+- Three.js is pinned to 0.170.0 from jsDelivr through an import map in `game.html`. Netlify's CSP allows that inline import map by its SHA-256 hash (in `_headers`). If you change the import map (for example the Three.js version), the browser console shows the new expected `sha256-...` value; paste it into `_headers`. Keep the import map on ONE line.
 - Controls: click a cube or press 1-3 to select; arrows/WASD slide; Q/E roll sideways; R/F tip forward/back; P or Esc pause. Touch controls come in the polish step.
 
 ## Updating level 1 par values (if you already ran schema.sql)

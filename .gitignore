@@ -3,7 +3,23 @@
 .env.*
 !.env.example
 js/config.js
+#deploy folder
+/deploy/
 
+#md files
+ASSETS/
+ASSETS.md
+ASSETS*.md
+
+DEPLOY/
+DEPLOY.md
+DEPLOY*.md
+
+QA_REPORT/
+QA_REPORT.md
+QA_REPORT*.md
+
+/docs/CHECKLIST.md
 
 # Netlify local state
 .netlify/

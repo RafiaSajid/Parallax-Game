@@ -17,11 +17,12 @@ import { createAvatarParts, makeDefaultSkinCanvas, DEFAULT_CAP } from './AvatarS
 // Glue between separate concerns:
 //   PuzzleState = rules   Interaction = pointer raycasting   entities = visuals   Sfx/Particles = feedback
 const AXES = { x: new THREE.Vector3(1, 0, 0), z: new THREE.Vector3(0, 0, 1) };
+// Held keys steer the PLAYER (camera-relative). [dx, dz]: dz -1 = forward, dx +1 = right.
 const MOVE = { arrowup: [0, -1], w: [0, -1], arrowdown: [0, 1], s: [0, 1], arrowleft: [-1, 0], a: [-1, 0], arrowright: [1, 0], d: [1, 0] };
 const TURN = { q: ['z', 1], e: ['z', -1], r: ['x', 1], f: ['x', -1] };
 
 export class Game {
-  constructor({ canvas, container, levelDef, settings = {}, avatar = {}, flow, onMove = () => {}, onTime = () => {}, onStatus = () => {}, onSolved = () => {}, onError = () => {} }) {
+  constructor({ canvas, container, levelDef, settings = {}, avatar = {}, flow, onMove = () => { }, onTime = () => { }, onStatus = () => { }, onSolved = () => { }, onError = () => { } }) {
     this.canvas = canvas; this.container = container;
     this.level = parseLevel(levelDef);
     this.state = new PuzzleState(this.level);
@@ -39,6 +40,10 @@ export class Game {
     this.world = null; this.actors = null; this.decor = [];
     this.cubes = []; this.byId = new Map(); this.plates = []; this.portal = null;
     this.content = new THREE.Box3();
+    this.keys = new Set(); this.noHop = false; this.bumpAt = 0; this.fwd = new THREE.Vector2();
+    const { width: W, depth: D } = this.level;
+    this.solidGrid = new Uint8Array(W * D); for (const w of this.level.walls) this.solidGrid[w.z * W + w.x] = 1;
+    this.isSolid = (x, z) => x < 0 || z < 0 || x >= W || z >= D || this.solidGrid[z * W + x] === 1; // outside the room counts as wall
   }
 
   async init(onProgress) {
@@ -53,7 +58,7 @@ export class Game {
       onHover: (id) => { this.indicators.setHover(id === null ? null : this.byId.get(id)?.group ?? null); this.canvas.style.cursor = id === null ? '' : 'pointer'; },
       onSelect: (id) => {
         this.indicators.setSelected(id === null ? null : this.byId.get(id)?.group ?? null);
-        if (id !== null) this.avatar?.rideCube(this.byId.get(id)); // the character hops onto the newly selected cube
+        if (id !== null && !this.noHop) this.avatar?.rideCube(this.byId.get(id)); // the character hops onto the newly selected cube
         if (id !== null && this.ready) this.sfx.play('select');
         this.status();
       },
@@ -82,6 +87,11 @@ export class Game {
     const walls = new THREE.Group(); // walls can hide a cube behind them, so they are ray occluders (one group, not per mesh)
     for (const p of this.level.walls) { const o = a.create('wall'); o.position.set(p.x, 0, p.z); walls.add(o); }
     w.add(walls); this.interaction.registerOccluder(walls);
+    { // the REAL walking surface: buildWorld moves every floor tile to y=0, so its top is above 0 (measured, not assumed)
+      w.updateMatrixWorld(true);
+      const f = w.children.find((c) => c !== base && c !== walls);
+      this.floorY = f ? new THREE.Box3().setFromObject(f).max.y : 0;
+    }
 
     // Decorative objects are NOT registered with Interaction: they cannot be selected or block clicks.
     const spots = [[-2.2, 2.6, -2.0], [width + 1.2, 3.2, -1.4], [-1.9, 1.7, depth + 0.4], [width + 1.5, 2.0, depth * 0.6], [(width - 1) / 2, 4.4, -3.2]];
@@ -107,13 +117,19 @@ export class Game {
     this.cubes = lv.cubes.map((c) => {
       const e = new CubeEntity(c.id, a.createCube(), [c.x, c.z], c.mark);
       e.onSettled = (cube) => this.verify(cube);
+      { // the REAL size of this cube's visual (model + amber mark card), so the player can never visibly clip into it
+        e.group.updateMatrixWorld(true);
+        const b = new THREE.Box3().setFromObject(e.group), p = e.group.position;
+        e.half = THREE.MathUtils.clamp(Math.max(b.max.x - p.x, p.x - b.min.x, b.max.z - p.z, p.z - b.min.z, b.max.y - p.y, p.y - b.min.y), 0.35, 0.7);
+      }
       g.add(e.group); this.byId.set(c.id, e);
       this.interaction.register(e.group, c.id); // explicit registry of interactive objects
       return e;
     });
     this.avatar = new Avatar(this.avatarParts); g.add(this.avatar.group); // cosmetic: not registered with Interaction
+    this.avatar.setWorld({ solid: this.isSolid, floorY: this.floorY ?? 0, cubes: () => this.cubes, pads: [...lv.plates, lv.portal] }); // collision uses the live cube visuals
     this.avatar.rideCube(this.cubes[0], true);
-    this.sm.setFollowTarget(this.avatar.pos); // the smoothed position (without the hop), so the camera does not bounce
+    this.sm.setFollowTarget(this.avatar.pos, this.avatar); // live position + facing: the chase camera follows the real player
   }
 
   setCameraMode(mode) { this.sm.setMode(mode); }
@@ -145,11 +161,11 @@ export class Game {
   perform(a) {
     const st = this.state;
     let r;
-    if (a.type === 'undo') { r = st.undo(); if (!r.ok) return; this.interaction.select(r.id); }
+    if (a.type === 'undo') { r = st.undo(); if (!r.ok) return; this.noHop = true; this.interaction.select(r.id); this.noHop = false; } // undo must not yank the player onto the cube
     else if (a.type === 'move') r = st.move(a.id, a.dx, a.dz);
     else r = st.rotate(a.id, a.axis, a.dir);
     const cube = this.byId.get(a.type === 'undo' ? r.id : a.id);
-    if (!r.ok) { if (a.type === 'move') { cube?.bump(a.dx, a.dz); this.sfx.play('bump'); } return; } // illegal: rules reject it, nothing changes
+    if (!r.ok) { if (a.type === 'move') { if (a.push) { if (this.time < this.bumpAt) return; this.bumpAt = this.time + 0.6; } cube?.bump(a.dx, a.dz); this.sfx.play('bump'); } return; } // illegal: rules reject it, nothing changes
     if (r.type === 'move') cube.slide(r.dx, r.dz); else cube.turn(AXES[r.axis], r.dir);
     this.sfx.play(a.type === 'undo' ? 'undo' : r.type === 'move' ? 'slide' : 'turn');
     if (!r.undo) this.running = true; // the clock starts with your first real action
@@ -183,7 +199,20 @@ export class Game {
   /* ---------- input ---------- */
   bind() {
     const { signal } = this.abort;
-    window.addEventListener('keydown', (e) => this.onKey(e), { signal });
+    window.addEventListener('keydown', (e) => { this.trackKey(e, true); this.onKey(e); }, { signal });
+    window.addEventListener('keyup', (e) => this.trackKey(e, false), { signal });
+    window.addEventListener('blur', () => this.keys.clear(), { signal });
+    // Drag on the canvas to turn the third-person camera around the player (a small movement is still a click).
+    let drag = null;
+    this.canvas.addEventListener('pointerdown', (e) => { drag = { id: e.pointerId, x: e.clientX, last: e.clientX, on: false }; }, { signal });
+    window.addEventListener('pointermove', (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      if (!drag.on && Math.abs(e.clientX - drag.x) > 6) drag.on = true;
+      if (drag.on) this.sm.orbit((e.clientX - drag.last) * 0.007);
+      drag.last = e.clientX;
+    }, { signal });
+    window.addEventListener('pointerup', () => { drag = null; }, { signal });
+    window.addEventListener('pointercancel', () => { drag = null; }, { signal });
     window.addEventListener('blur', () => this.interaction.setHover(null), { signal });
     this.canvas.addEventListener('pointermove', (e) => {
       const r = this.canvas.getBoundingClientRect();
@@ -192,17 +221,55 @@ export class Game {
     this.canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); this.onError('The graphics context was lost. Refresh the page to continue.'); }, { signal });
   }
 
+  // Tracks which movement keys are held (the player walks while they are down).
+  trackKey(e, down) {
+    if (/^(input|select|textarea)$/i.test(e.target?.tagName ?? '')) return;
+    const k = e.key.toLowerCase();
+    if (MOVE[k]) {
+      if (!down) this.keys.delete(k);
+      else if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) { this.keys.add(k); if (this.canAct()) e.preventDefault(); } // Shift+direction slides the selected cube instead
+    } else if (k === ' ' && !down && this.canAct()) e.preventDefault(); // a focused button must not "click" on Space
+  }
+
   onKey(e) {
     if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || !this.canAct()) return;
     if (/^(input|select|textarea)$/i.test(e.target?.tagName ?? '')) return;
     const k = e.key.toLowerCase(), id = this.interaction.selectedId;
-    if (MOVE[k] || TURN[k]) {
+    if (MOVE[k] && e.shiftKey) { // Shift + direction: slide the SELECTED cube one cell (kept from the original controls, relative to the camera, snapped to the grid)
       e.preventDefault();
-      if (id === null) return; // nothing selected: keys do nothing (the panel says so)
-      if (MOVE[k]) this.request({ type: 'move', id, dx: MOVE[k][0], dz: MOVE[k][1] });
-      else this.request({ type: 'turn', id, axis: TURN[k][0], dir: TURN[k][1] });
+      if (id === null) return;
+      this.sm.getMoveForward(this.fwd);
+      const fx = Math.abs(this.fwd.x) > Math.abs(this.fwd.y) ? Math.sign(this.fwd.x) : 0, fz = fx ? 0 : Math.sign(this.fwd.y);
+      const f = -MOVE[k][1], r = MOVE[k][0]; // right = (-fz, fx)
+      this.request({ type: 'move', id, dx: fx * f - fz * r, dz: fz * f + fx * r });
+    } else if (TURN[k]) {
+      e.preventDefault();
+      if (id === null) return; // nothing selected: the rotate keys do nothing (the panel says so)
+      this.request({ type: 'turn', id, axis: TURN[k][0], dir: TURN[k][1] });
+    } else if (k === ' ') {
+      e.preventDefault();
+      if (this.avatar.jump(id === null ? null : this.byId.get(id))) this.sfx.play('jump'); // next to the selected cube: hop onto it, else a normal jump
     } else if (k === 'z') { e.preventDefault(); this.undo(); }
+    else if (k === '[' || k === ']') this.sm.orbit(k === '[' ? -0.45 : 0.45); // keyboard camera turn (third-person)
     else if (/^[1-9]$/.test(k) && this.byId.has(k)) this.interaction.select(k);
+  }
+
+  // Held keys -> a world-space direction relative to the camera's viewing direction.
+  updatePlayer() {
+    let f = 0, r = 0;
+    if (this.canAct()) for (const k of this.keys) { const m = MOVE[k]; r += m[0]; f -= m[1]; }
+    const len = Math.hypot(f, r); if (len > 1) { f /= len; r /= len; }
+    this.sm.getMoveForward(this.fwd);
+    const fx = this.fwd.x, fz = this.fwd.y; // right = (-fz, fx)
+    this.avatar.setInput(fx * f - fz * r, fz * f + fx * r);
+  }
+
+  // Walking into a cube's side asks the RULES to slide it one cell. Walls, other cubes and the closed portal still say no.
+  tryPush() {
+    const a = this.avatar, p = a.push;
+    if (!p || !this.canAct() || this.busy || this.pendingSolved || this.pendingComplete) return;
+    a.push = null; a.pushHold = 0;
+    this.perform({ type: 'move', id: p.id, dx: p.dx, dz: p.dz, push: true });
   }
 
   /* ---------- loop ---------- */
@@ -232,7 +299,10 @@ export class Game {
       } else if (this.queued && this.canAct()) { const a = this.queued; this.queued = null; this.perform(a); }
     }
     this.plates.forEach((p) => p.update(step, this.time, motion)); this.portal.update(step, this.time, motion);
+    this.updatePlayer();
     this.avatar.update(step, this.time, motion);
+    this.tryPush();
+    this.sm.setPushFocus(this.avatar.pushEnt && !this.pendingComplete ? this.avatar.pushEnt.group.position : null); // chase camera keeps the pushed cube in frame
     for (const d of this.decor) {
       d.o.position.y = d.y + Math.sin(this.time * 0.6 + d.phase) * (d.amp ?? 0.18) * motion;
       d.o.rotation.y += step * d.spin * motion;

@@ -3,7 +3,7 @@
 import { initToy } from './toy.js';
 
 export const MODELS = {
-  planet: 'assets/models/tiny_planet_friends_3d-star-3034.glb', // landing page
+  planet: 'assets/models/cute_cat_in_cute_banana.glb', // landing page
   cat: 'assets/models/cute_cat_in_cute_banana.glb',             // login and signup pages
 };
 
@@ -23,12 +23,12 @@ export async function initModelToy(slot, key) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const canvas = document.createElement('canvas');
   canvas.className = 'model-toy'; canvas.tabIndex = 0; canvas.setAttribute('role', 'img');
-  canvas.setAttribute('aria-label', 'Drag to move anywhere, Shift and drag to spin, press Space to spin me.');
+  canvas.setAttribute('aria-label', 'A 3D toy. Drag to move it anywhere, Shift and drag to spin it, press Space to spin it.');
   document.body.append(canvas);
 
   const renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); renderer.toneMapping = T.NeutralToneMapping;
-  const scene = new T.Scene(), camera = new T.PerspectiveCamera(30, 1, 0.1, 50); camera.position.set(0, 0.08, 4.6);
+  const scene = new T.Scene(), camera = new T.PerspectiveCamera(30, 1, 0.1, 50); camera.position.set(0, 0.1, 4.6);
   scene.add(new T.HemisphereLight(0xffffff, 0xffd9ec, 1.7));
   const sun = new T.DirectionalLight(0xffffff, 2.2); sun.position.set(2, 3, 4); scene.add(sun);
 

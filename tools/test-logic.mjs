@@ -47,14 +47,14 @@ test('portal stays closed until the plate is active; the plate cube cannot step 
 });
 test('level 1: shipped solution solves it', () => {
   const s = new PuzzleState(parseLevel(level01));
-  const sol = 'cube 2 right > cube 2 down > cube 2 right > cube 2 right > cube 2 right > cube 2 up > cube 2 right > cube 2 up > cube 2 up > cube 3 right > cube 3 right > cube 3 right > cube 3 right > cube 3 up > cube 3 F > cube 2 up'.split(' > ');
+  const sol = 'cube 1 down > cube 1 down > cube 1 down > cube 1 right > cube 1 right > cube 1 right > cube 1 up > cube 1 right > cube 1 up > cube 1 up > cube 3 right > cube 3 right > cube 3 right > cube 3 right > cube 3 up > cube 3 F > cube 1 up'.split(' > ');
   const D = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
   for (const step of sol) {
     const [, id, a] = step.split(' ');
     const r = D[a] ? s.move(id, ...D[a]) : s.rotate(id, a === 'F' ? 'x' : 'x', a === 'F' ? -1 : 1);
     assert.ok(r.ok, `${step} -> ${r.reason}`);
   }
-  assert.equal(s.solved, true); assert.equal(s.moves, 16);
+  assert.equal(s.solved, true); assert.equal(s.moves, 17);
 });
 test('undo restores positions, orientation and move count exactly (random walks)', () => {
   let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -101,7 +101,7 @@ test('illegal transitions are ignored and notify nobody', () => {
   assert.equal(n, 3); // start, solve, finish
 });
 test('restart works from playing, paused, solved and complete, and always lands in PLAYING', () => {
-  for (const setup of [(f) => {}, (f) => f.pause(), (f) => f.solve(), (f) => { f.solve(); f.finish(); }]) {
+  for (const setup of [(f) => { }, (f) => f.pause(), (f) => f.solve(), (f) => { f.solve(); f.finish(); }]) {
     const f = new GameFlow(); f.start(); setup(f); const ev = []; f.on((s, p, e) => ev.push(e));
     assert.ok(f.restart()); assert.equal(f.state, S.PLAYING); assert.deepEqual(ev, ['restart']);
   }

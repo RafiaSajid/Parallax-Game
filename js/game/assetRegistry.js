@@ -35,12 +35,12 @@ export const ASSET_REGISTRY = {
     meta: { role: 'floor' },
   },
   decor: {
-    file: null, fit: 0.6, scale: 1, anchor: 'center', position: [0, 0, 0], rotation: [0, 0, 0],
+    file: 'assets/models/low_poly_fantasy_lantern.glb', fit: 1.6, scale: 1, anchor: 'center', position: [0, 0, 0], rotation: [0, 0, 0],
     uniqueMaterials: false, castShadow: false,
     meta: { role: 'decor' },
   },
   pillar: {
-    file: 'assets/models/zhongli_pillar.glb', fit: 3.2, scale: 1, anchor: 'center', position: [0, 0, 0], rotation: [0, 0, 0],
+    file: 'assets/models/low_poly_pillar_button.glb', fit: 3.9, scale: 1, anchor: 'center', position: [0, 0, 5], rotation: [0, 180, 0],
     uniqueMaterials: false, castShadow: true,
     meta: { role: 'decor' },
   },

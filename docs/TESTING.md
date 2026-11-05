@@ -11,7 +11,7 @@ Tests cover: right-hand-rule rotations, walls/bounds/occupied cells, plate needs
 1. Room appears; cube 1 has the selection ring + floating arrow. Panel (bottom-left) shows status.
 2. Hover a cube: thin blue ring + pointer cursor. Move off: both disappear.
 3. Click a different cube: selection moves. Click empty floor or a wall: deselects; WASD then does nothing.
-4. Press 1/2/3 to pick cubes. WASD/arrows slide one cell. Into a wall/another cube/outside: a small "bump", no move, counter unchanged.
+4. Press 1/2/3 to pick cubes. WASD move the player. Shift + WASD/arrows slide one cell. Into a wall/another cube/outside: a small "bump", no move, counter unchanged.
 5. Q/E roll, R/F tip. Status says "marked face UP" only when the amber face points up.
 6. Select cube 3, slide it onto the plate. Plate glows and the portal opens ONLY when its amber face is up.
 7. Z undoes step by step (also rotations). Moves counter follows.
@@ -21,7 +21,7 @@ Tests cover: right-hand-rule rotations, walls/bounds/occupied cells, plate needs
 11. Press Restart 10 times: no slowdown, selection still works.
 12. Console shows no `[puzzle] ... differs from rules` warning (that would mean a rotation-direction bug).
 
-## Added in step 4b
+## Added in steps
 - Resize: drag the window very short and very narrow. The whole room, both pillars and the floating shapes must stay in view.
 - Win flow: finish a room. A completion card shows stars, time and moves, then "Result saved to your profile." and any new achievements. "Next room" opens room 2.
 - Room 2 and 3: both plates must glow before the portal opens (objective banner shows 0/2, 1/2, 2/2).

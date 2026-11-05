@@ -32,25 +32,27 @@ export function mountSettings(box, userId, options = {}) {
       custRow = h('div', { class: 'field' }, h('label', {}, 'Your character'), h('p', { class: 'hint' }, 'Paint your cylinder. It appears in the game.'), cBtn, cMsg);
     }
 
-    const form = h('form', { novalidate: true, onsubmit: (e) => {
-      e.preventDefault();
-      run(btn, msg, async () => {
-        const saved = await saveSettings(userId, { sound_enabled: sound.checked, volume: Number(vol.value), quality: quality.value, camera_mode: camera.value, reduced_motion: reduced.checked, invert_controls: invert.checked });
-        try { localStorage.setItem(HELP_KEY, help.checked ? '1' : '0'); } catch { /* storage blocked: device setting simply not remembered */ }
-        sound.checked = saved.sound_enabled; vol.value = saved.volume; volOut.textContent = String(saved.volume); quality.value = saved.quality; camera.value = saved.camera_mode;
-        reduced.checked = saved.reduced_motion; invert.checked = saved.invert_controls; sync();
-        showMsg(msg, 'success', 'Saved to your account.'); // only reached after the database returned the saved row
-      });
-    } },
-    custRow,
-    h('div', { class: 'field' }, h('label', { class: 'check' }, sound, ' Sound effects')),
-    h('div', { class: 'field' }, h('label', { for: 'set-volume' }, 'Volume ', volOut), vol),
-    h('div', { class: 'field' }, h('label', { for: 'set-quality' }, 'Graphics quality'), quality),
-    h('div', { class: 'field' }, h('label', { for: 'set-camera' }, 'Camera view'), camera),
-    h('div', { class: 'field' }, h('label', { class: 'check' }, reduced, ' Reduce motion')),
-    h('div', { class: 'field' }, h('label', { class: 'check' }, invert, ' Invert camera movement')),
-    h('div', { class: 'field' }, h('label', { class: 'check' }, help, ' Show the controls panel on the game screen'), h('p', { class: 'hint' }, 'This one is stored on this device only. Everything else follows your account.')),
-    msg, btn);
+    const form = h('form', {
+      novalidate: true, onsubmit: (e) => {
+        e.preventDefault();
+        run(btn, msg, async () => {
+          const saved = await saveSettings(userId, { sound_enabled: sound.checked, volume: Number(vol.value), quality: quality.value, camera_mode: camera.value, reduced_motion: reduced.checked, invert_controls: invert.checked });
+          try { localStorage.setItem(HELP_KEY, help.checked ? '1' : '0'); } catch { /* storage blocked: device setting simply not remembered */ }
+          sound.checked = saved.sound_enabled; vol.value = saved.volume; volOut.textContent = String(saved.volume); quality.value = saved.quality; camera.value = saved.camera_mode;
+          reduced.checked = saved.reduced_motion; invert.checked = saved.invert_controls; sync();
+          showMsg(msg, 'success', 'Saved to your account.'); // only reached after the database returned the saved row
+        });
+      }
+    },
+      custRow,
+      h('div', { class: 'field' }, h('label', { class: 'check' }, sound, ' Sound effects')),
+      h('div', { class: 'field' }, h('label', { for: 'set-volume' }, 'Volume ', volOut), vol),
+      h('div', { class: 'field' }, h('label', { for: 'set-quality' }, 'Graphics quality'), quality),
+      h('div', { class: 'field' }, h('label', { for: 'set-camera' }, 'Camera view'), camera),
+      h('div', { class: 'field' }, h('label', { class: 'check' }, reduced, ' Reduce motion')),
+      h('div', { class: 'field' }, h('label', { class: 'check' }, invert, ' Invert camera movement')),
+      h('div', { class: 'field' }, h('label', { class: 'check' }, help, ' Show the controls panel on the game screen'), h('p', { class: 'hint' }, 'This one is stored on this device only. Everything else follows your account.')),
+      msg, btn);
     return form;
   });
 }

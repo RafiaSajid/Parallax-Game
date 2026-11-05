@@ -1,97 +1,144 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="light">
-<title>Play · PARALLAX</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>Play · PARALLAX</title>
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect x=%274%27 y=%274%27 width=%2724%27 height=%2724%27 rx=%277%27 fill=%27%23FF5FA2%27 stroke=%27%232B2350%27 stroke-width=%273%27/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script
+    type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 </head>
+
 <body class="game">
-<div id="app" class="game-shell is-loading">
-  <header class="hud">
-    <div class="hud-stats">
-      <strong id="level-name">Loading…</strong>
-      <span class="muted">Time <b id="hud-time">0:00.0</b></span>
-      <span class="muted">Moves <b id="hud-moves">0</b><span id="hud-par"></span></span>
+  <div id="app" class="game-shell is-loading">
+    <header class="hud">
+      <div class="hud-stats">
+        <strong id="level-name">Loading…</strong>
+        <span class="muted">Time <b id="hud-time">0:00.0</b></span>
+        <span class="muted">Moves <b id="hud-moves">0</b><span id="hud-par"></span></span>
+      </div>
+      <div class="hud-actions">
+        <button id="btn-camera" class="btn btn-ghost btn-sm" type="button" aria-pressed="false">Camera:
+          overview</button>
+        <button id="btn-sound" class="btn btn-ghost btn-sm" type="button" aria-pressed="true">Sound: on</button>
+        <button id="btn-how" class="btn btn-ghost btn-sm" type="button">How to play</button>
+        <button id="btn-undo" class="btn btn-ghost btn-sm" type="button">Undo</button>
+        <button id="btn-restart" class="btn btn-ghost btn-sm" type="button">Restart</button>
+        <button id="btn-pause" class="btn btn-sm" type="button">Pause</button>
+      </div>
+      <p id="objective" class="objective" role="status"></p>
+    </header>
+    <div class="stage">
+      <canvas id="game-canvas" aria-label="Puzzle room"></canvas>
+      <div id="placeholder" class="stage-placeholder">
+        <h2 id="loading">Loading room…</h2>
+        <div id="msg" class="msg" role="alert" hidden></div>
+        <a class="btn btn-ghost" href="levels.html">Back to levels</a>
+      </div>
     </div>
-    <div class="hud-actions">
-      <button id="btn-camera" class="btn btn-ghost btn-sm" type="button" aria-pressed="false">Camera: overview</button>
-      <button id="btn-sound" class="btn btn-ghost btn-sm" type="button" aria-pressed="true">Sound: on</button>
-      <button id="btn-how" class="btn btn-ghost btn-sm" type="button">How to play</button>
-      <button id="btn-undo" class="btn btn-ghost btn-sm" type="button">Undo</button>
-      <button id="btn-restart" class="btn btn-ghost btn-sm" type="button">Restart</button>
-      <button id="btn-pause" class="btn btn-sm" type="button">Pause</button>
-    </div>
-    <p id="objective" class="objective" role="status"></p>
-  </header>
-  <div class="stage">
-    <canvas id="game-canvas" aria-label="Puzzle room"></canvas>
-    <div id="placeholder" class="stage-placeholder">
-      <h2 id="loading">Loading room…</h2>
-      <div id="msg" class="msg" role="alert" hidden></div>
-      <a class="btn btn-ghost" href="levels.html">Back to levels</a>
-    </div>
-  </div>
-  <details id="help" class="help" hidden>
-    <summary>Controls<span class="sel" id="status-selection">Loading…</span></summary>
-    <dl>
-      <div><dt>Click / tap cube</dt><dd>Select</dd></div>
-      <div><dt>Click empty space</dt><dd>Deselect</dd></div>
-      <div><dt><kbd>1</kbd>–<kbd>3</kbd></dt><dd>Pick a cube</dd></div>
-      <div><dt><kbd>W A S D</kbd> / arrows</dt><dd>Slide</dd></div>
-      <div><dt><kbd>Q</kbd> <kbd>E</kbd></dt><dd>Roll left / right</dd></div>
-      <div><dt><kbd>R</kbd> <kbd>F</kbd></dt><dd>Tip forward / back</dd></div>
-      <div><dt><kbd>Z</kbd></dt><dd>Undo</dd></div>
-      <div><dt><kbd>C</kbd></dt><dd>Switch camera</dd></div>
-      <div><dt><kbd>P</kbd> / <kbd>Esc</kbd></dt><dd>Pause</dd></div>
-    </dl>
-  </details>
+    <details id="help" class="help" hidden>
+      <summary>Controls<span class="sel" id="status-selection">Loading…</span></summary>
+      <dl>
+        <div>
+          <dt>Click / tap cube</dt>
+          <dd>Select</dd>
+        </div>
+        <div>
+          <dt>Click empty space</dt>
+          <dd>Deselect</dd>
+        </div>
+        <div>
+          <dt><kbd>1</kbd>–<kbd>3</kbd></dt>
+          <dd>Pick a cube</dd>
+        </div>
+        <div>
+          <dt><kbd>W A S D</kbd> / arrows</dt>
+          <dd>Player move</dd>
+        </div>
+        <div>
+          <dt><kbd>Q</kbd> <kbd>E</kbd></dt>
+          <dd>Roll left / right the selected cube</dd>
+        </div>
+        <div>
+          <dt><kbd>R</kbd> <kbd>F</kbd></dt>
+          <dd>Tip forward / back the selected cube</dd>
+        </div>
+        <div>
+          <dt><kbd>Shift</kbd>+ arrows/ <kbd>W A S D</kbd></dt>
+          <dd>Move cube</dd>
+        </div>
+        <div>
+          <dt><kbd>C</kbd></dt>
+          <dd>Switch camera</dd>
+        </div>
+        <div>
+          <dt><kbd>P</kbd> / <kbd>Esc</kbd></dt>
+          <dd>Pause</dd>
+        </div>
+      </dl>
+    </details>
 
-  <div id="pause" class="overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
-    <div class="card">
-      <h2 id="pause-title">Paused</h2>
-      <button id="pause-resume" class="btn btn-primary" type="button">Resume</button>
-      <button id="pause-restart" class="btn" type="button">Restart room</button>
-      <a class="btn btn-ghost" href="profile.html">Settings</a>
-      <a class="btn btn-ghost" href="levels.html">Quit to levels</a>
+    <div id="pause" class="overlay" role="dialog" aria-modal="true" aria-labelledby="pause-title" hidden>
+      <div class="card">
+        <h2 id="pause-title">Paused</h2>
+        <button id="pause-resume" class="btn btn-primary" type="button">Resume</button>
+        <button id="pause-restart" class="btn" type="button">Restart room</button>
+        <a class="btn btn-ghost" href="profile.html">Settings</a>
+        <a class="btn btn-ghost" href="levels.html">Quit to levels</a>
+      </div>
     </div>
-  </div>
 
-  <div id="intro" class="overlay" role="dialog" aria-modal="true" aria-labelledby="intro-title" hidden>
-    <div class="card">
-      <h2 id="intro-title">How to play</h2>
-      <ol class="howto">
-        <li><b>Each cube has one amber face.</b> Turn a cube so that face points UP, then slide it onto a glowing plate.</li>
-        <li><b>Light every plate</b> and the portal opens.</li>
-        <li><b>Slide one spare cube into the portal.</b> That finishes the room. You do not need to move every cube.</li>
-        <li>Fewer moves and a faster time earn up to three stars. Stuck? Press Z to undo or Restart.</li>
-      </ol>
-      <button id="intro-go" class="btn btn-primary" type="button">Got it, let me play</button>
+    <div id="intro" class="overlay" role="dialog" aria-modal="true" aria-labelledby="intro-title" hidden>
+      <div class="card">
+        <h2 id="intro-title">How to play</h2>
+        <ol class="howto">
+          <li><b>Each cube has one amber face.</b> Turn a cube so that face points UP, then slide/push it onto a glowing
+            plate.</li>
+          <li><b>Light every plate</b> and the portal opens.</li>
+          <li><b>Push / Slide one spare cube into the portal.</b> That finishes the room. You do not need to move every
+            cube.
+          </li>
+          <li>Fewer moves and a faster time earn up to three stars. Stuck? Press Z to undo or Restart.</li>
+        </ol>
+        <button id="intro-go" class="btn btn-primary" type="button">Got it, let me play</button>
+      </div>
     </div>
-  </div>
 
-  <div id="complete" class="overlay" role="dialog" aria-modal="true" aria-labelledby="complete-title" hidden>
-    <div class="card">
-      <h2 id="complete-title">Room complete</h2>
-      <p id="done-stars" class="stars" role="img"></p>
-      <ul class="facts"><li>Time <b id="done-time"></b></li><li>Moves <b id="done-moves"></b></li></ul>
-      <p id="done-save" class="msg msg-info" role="status"></p>
-      <p id="done-detail" class="hint" hidden></p>
-      <button id="done-retry" class="btn" type="button" hidden>Retry saving</button>
-      <div id="done-ach" hidden><h3>New achievements</h3><ul id="done-ach-list" class="list"></ul></div>
-      <p class="hint">Results are recorded by your browser and are not independently verified. There is no leaderboard.</p>
-      <button id="done-replay" class="btn btn-primary" type="button">Play again</button>
-      <a id="done-next" class="btn" href="levels.html">Back to levels</a>
-      <a class="btn btn-ghost" href="dashboard.html">Dashboard</a>
+    <div id="complete" class="overlay" role="dialog" aria-modal="true" aria-labelledby="complete-title" hidden>
+      <div class="card">
+        <h2 id="complete-title">Room complete</h2>
+        <p id="done-stars" class="stars" role="img"></p>
+        <ul class="facts">
+          <li>Time <b id="done-time"></b></li>
+          <li>Moves <b id="done-moves"></b></li>
+        </ul>
+        <p id="done-save" class="msg msg-info" role="status"></p>
+        <p id="done-detail" class="hint" hidden></p>
+        <button id="done-retry" class="btn" type="button" hidden>Retry saving</button>
+        <div id="done-ach" hidden>
+          <h3>New achievements</h3>
+          <ul id="done-ach-list" class="list"></ul>
+        </div>
+        <p class="hint">Results are recorded by your browser and are not independently verified. There is no
+          leaderboard.</p>
+        <button id="done-replay" class="btn btn-primary" type="button">Play again</button>
+        <a id="done-next" class="btn" href="levels.html">Back to levels</a>
+        <a class="btn btn-ghost" href="dashboard.html">Dashboard</a>
+      </div>
     </div>
   </div>
-</div>
-<noscript><p class="msg msg-error">PARALLAX needs JavaScript enabled.</p></noscript>
-<script type="module" src="js/pages/game.js"></script>
+  <noscript>
+    <p class="msg msg-error">PARALLAX needs JavaScript enabled.</p>
+  </noscript>
+  <script type="module" src="js/pages/game.js"></script>
 </body>
+
 </html>
